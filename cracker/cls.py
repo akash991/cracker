@@ -10,7 +10,7 @@ class Base():
         self.assets = assets
 
     def collect_response(self):
-        with open("/home/akash/Desktop/Cracker/data/binance_btc_pair.txt") as file:
+        with open(os.path.join(WORKDIR, "data/binance_btc_pair.txt")) as file:
             symbol = file.read().split("\n")
         data_list = []
         for _ in (symbol[:150], symbol[150:]):
@@ -34,19 +34,19 @@ class Base():
             temp["start_price"] = entry["price"]
             temp["current_price"] = entry["price"]
             new_data.append(temp)
-        with open("data/dump.json", "w") as file:
+        with open(os.path.join(WORKDIR, "data/dump.json"), "w") as file:
             json.dump(new_data, file)
 
     def update_json(self):
         old_data = None
-        with open("data/dump.json") as file:
+        with open(os.path.join(WORKDIR, "data/dump.json")) as file:
             old_data = json.load(file)
         current_time = time.time()
         data = self.collect_response()
         for old, current in zip(old_data, data):
             old["current_price"] = current["price"]
             old["percent_change"] = (old["current_price"] - old["start_price"]) * 100.0 / old["start_price"]
-        with open("data/dump.json", "w") as file:
+        with open(os.path.join(WORKDIR, "data/dump.json"), "w") as file:
             json.dump(old_data, file)
 
     def send_notification(self, messages):
@@ -60,10 +60,10 @@ class Base():
         hour_alerts = []
         hour_flag = False
 
-        with open("data/dump.json") as file:
+        with open(os.path.join(WORKDIR, "data/dump.json")) as file:
             json_data = json.load(file)
 
-        top_performers = self.fetch_performers("data/dump.json")
+        top_performers = self.fetch_performers(os.path.join(WORKDIR,"data/dump.json"))
         
         current_time = time.time()
         last_notification_at = self.last_notification_time
